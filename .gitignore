@@ -13,8 +13,6 @@ components
 vendor
 build
 dest
-dist
-src
 lib-cov
 coverage
 nbproject
@@ -33,7 +31,7 @@ tmp
 *.rar
 *.tar
 *.zip
-
+                    
 # OS, Logs and databases #
 # #########################
 *.pid

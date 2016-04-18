@@ -18,6 +18,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
+    "start": "node dist/start.js",
     "preformat": "standard --version || npm -g install standard",
     "format": "standard --format",
     "pretest": "standard --version || npm -g install standard",
@@ -28,11 +29,29 @@
     "version": "thoughtful changelog -o -a && npm run thought",
     "preversion": "npm run thoughtcheck"
   },
-  "dependencies": {},
+  "dependencies": {
+    "child-process-promise": "^2.0.1",
+    "directory-tree-stream": "^1.0.0",
+    "express": "^4.13.4",
+    "findit": "^2.0.0",
+    "media-mime-detect": "^0.1.1",
+    "mmmagic": "^0.4.1",
+    "multer": "^1.1.0",
+    "q": "^1.4.1",
+    "q-io": "^1.13.2",
+    "sharp": "^0.14.0",
+    "tingodb": "^0.4.2",
+    "uuid": "^2.0.2"
+  },
   "devDependencies": {
+    "async-hook": "~1.2.0",
+    "chai": "^3.5.0",
+    "chai-as-promised": "^5.3.0",
     "ghooks": "^1.0.3",
+    "image-testdata": "github:gachou/image-testdata",
     "mocha": "^2.3.3",
-    "thoughtful-release": "^0.3.0"
+    "thoughtful-release": "^0.3.0",
+    "trace": "^2.3.0"
   },
   "standard": {
     "ignore": [
@@ -49,5 +68,5 @@
       "pre-commit": "standard"
     }
   },
-  "keywords": [  ]
+  "keywords": []
 }
