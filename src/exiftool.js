@@ -60,7 +60,7 @@ class ExifTool {
    *
    * ```js
    * {
-   *    XMP: { HierarchicalSubject: 'Places|Darmstadt|Prinz-Georgs-Garten' },
+   *    XMP: { HierarchicalSubject: ['Places|Darmstadt|Prinz-Georgs-Garten'] },
    *    Composite: { Aperture: 4.7 }
    * }
    * ```
@@ -71,7 +71,10 @@ class ExifTool {
    * @returns {Promise<object>}
    */
   tags (tags) {
-    return this.run(['-G', '-j'].concat((tags || []).map((tag) => `-${tag}`)))
+    // -G: Print each tag with group-name (like "XMP:HierarchicalSubject")
+    // -json: Print as JSON
+    // -struct: Print arrays as array (even if they only have one element)
+    return this.run(['-G', '-json', '-struct'].concat((tags || []).map((tag) => `-${tag}`)))
       .then((output) => {
         var result = JSON.parse(output.stdout)[0]
         delete result['SourceFile']
@@ -91,10 +94,16 @@ class ExifTool {
     // Run exiftool so that it accepts a json input as stdin
     var result = this.run(['-G', '-j=-'])
     result.child.stdin.end(JSON.stringify(stdinObj))
-
     return result
   }
 
+  /**
+   * Makes sure that the XMP:Identifier is set in the file's metadata.
+   * Returns an existing identifier if present. Generates and stores a new one
+   * and returns it, if none exists at the moment.
+   *
+   * @returns {Promise<string>} a unique identifier
+   */
   ensureId () {
     return this.tags(['XMP:Identifier'])
       .then((tags) => {

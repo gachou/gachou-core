@@ -41,7 +41,7 @@ describe('the ExifTool#tags method()', function () {
   it('return a list of tags for a file', function () {
     var file = require.resolve('image-testdata/data/no-xmp-identifier.jpg')
     return expect(exiftool(file).tags(['Composite:Aperture', 'XMP:HierarchicalSubject'])).to.eventually.deep.equal({
-      'XMP:HierarchicalSubject': 'Places|Darmstadt|Prinz-Georgs-Garten',
+      'XMP:HierarchicalSubject': ['Places|Darmstadt|Prinz-Georgs-Garten'],
       'Composite:Aperture': 4.7
     })
   })
@@ -86,13 +86,13 @@ describe('the saveTags-method', function () {
     var tool = exiftool(targetFile)
     var result = qfs.copy(file, targetFile)
       .then(() => tool.saveTags({
-        'XMP:HierarchicalSubject': 'Lotus',
+        'XMP:HierarchicalSubject': ['Lotus'],
         'XMP:Identifier': 'abc'
       }))
       .then(() => tool.tags(['XMP:Identifier', 'XMP:HierarchicalSubject']))
 
     return expect(result).to.eventually.deep.equal({
-      'XMP:HierarchicalSubject': 'Lotus',
+      'XMP:HierarchicalSubject': ['Lotus'],
       'XMP:Identifier': 'abc'
     })
   })
