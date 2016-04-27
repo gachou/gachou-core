@@ -5,20 +5,6 @@ var Q = require('q')
 var _ = require('lodash')
 
 /**
- * @typedef {object} MediaMetadata
- * @property {string} id - the unique identifier (as stored in XMP:Identifier)
- * @property {string} urlId - the identifier for use in URLs and for retrieval from the MediaStorage
- * @property {Date} createDate - the creation date of the
- * @property {string[]} tags - a list of tags from XMP:HierarchicalSubject
- */
-
-/**
- * @typedef {object} MetadataQuery
- * @property {Date} after - only files created after this date will be returned
- * @property {Date} before - only files created before this date will be returned
- */
-
-/**
  *
  * @param {string} dbFolder path to the tingodatabase
  * @returns {MetadataIndex}
@@ -30,7 +16,7 @@ module.exports = function (dbFolder) {
 class MetadataIndex {
   constructor (dbFile) {
     this.db = new Loki(dbFile)
-    this.collection = this.db.addCollection('MetadataIndex')
+    this.collection = this.db.addCollection('EXIF:CreateDate')
   }
 
   /**

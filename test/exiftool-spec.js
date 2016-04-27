@@ -15,7 +15,7 @@
 
 // require('trace')
 
-var exiftool = require('../src/exiftool')
+var exiftool = require('../src/utils/exiftool')
 var path = require('path')
 var chai = require('chai')
 var expect = chai.expect

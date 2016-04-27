@@ -9,13 +9,12 @@
 var Q = require('q')
 var cp = require('child_process')
 var uuid = require('uuid')
+var moment = require('moment')
 
 // Wrapper for the exittool
 module.exports = function (file) {
   return new ExifTool(file)
 }
-
-module.exports.parseExifDate = parseExifDate
 
 class ExifTool {
 
@@ -92,7 +91,7 @@ class ExifTool {
       stdinObj[0][key] = tagObject[key]
     })
     // Run exiftool so that it accepts a json input as stdin
-    var result = this.run(['-G', '-j=-'])
+    var result = this.run(['-G', '-j=-', '-overwrite_original'])
     result.child.stdin.end(JSON.stringify(stdinObj))
     return result
   }
@@ -107,25 +106,25 @@ class ExifTool {
   ensureId () {
     return this.tags(['XMP:Identifier'])
       .then((tags) => {
+        // Make sure that the XMP:Identifier is set in the file's metadata.
         var id = tags['XMP:Identifier']
         if (id) {
           return id
         }
         // Create and store new id
-        var newId = 'gc-' + uuid.v4()
+        var newId = uuid.v4()
         return this.saveTags({ 'XMP:Identifier': newId })
           .then(() => newId)
       })
   }
+
+  created () {
+    return this.tags(['EXIF:CreateDate']).get('EXIF:CreateDate')
+  }
+
 }
 
-/**
- * Parses a string of the form `2011:06:23 16:15:45` into a JavaScript Date-object
- * @param {string} exifDate
- * @returns {Date} the corresponding date object in local time
- */
-function parseExifDate (exifDate) {
-  var utc = exifDate.replace(/(\d+):(\d+):(\d+) (\d+):(\d+):(\d+)/, '$1-$2-$3T$4:$5:$6Z')
-  // Compute UTC and add timezone offset (in minutes) to get the local time
-  return new Date(Date.parse(utc) + new Date().getTimezoneOffset() * 60000)
+var exifMomentFormat = 'YYYY:MM:DD hh:mm:ss'
+module.exports.parseExifDate = function (dateStr) {
+  return moment(dateStr, exifMomentFormat)
 }

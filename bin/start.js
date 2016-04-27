@@ -6,24 +6,17 @@
  */
 'use strict'
 
+require('trace')
+
 var express = require('express')
-var defaultMediaStorage = require('../src/media-storage')
 var app = express()
 var gachou = require('../src/gachou')
 var path = require('path')
 
-app.use(function (req, res, next) {
-  console.log(req.path)
-  console.log(path.resolve(__dirname, '..', 'static-test'))
-  next()
-})
 app.use('/static-test/', express.static(path.resolve(__dirname, '..', 'static-test')))
-
 app.use('/', gachou({
-  uploadDir: path.resolve(__dirname, '..', '..', 'upload'),
-  mediaStorage: defaultMediaStorage({
-    root: path.resolve(__dirname, '..', '..', 'data')
-  })
+  basePath: path.resolve(__dirname, '..', '..', 'gachou-data'),
+  uploadDir: path.resolve(__dirname, '..', '..', 'gachou-data', 'uploads')
 }))
 
 app.listen(3000, function () {
