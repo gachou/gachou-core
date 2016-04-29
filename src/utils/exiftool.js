@@ -121,10 +121,9 @@ class ExifTool {
   created () {
     return this.tags(['EXIF:CreateDate']).get('EXIF:CreateDate')
   }
-
 }
 
 var exifMomentFormat = 'YYYY:MM:DD hh:mm:ss'
 module.exports.parseExifDate = function (dateStr) {
-  return moment(dateStr, exifMomentFormat)
+  return moment(dateStr, exifMomentFormat).toDate()
 }

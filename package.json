@@ -31,6 +31,7 @@
   },
   "dependencies": {
     "async": "^2.0.0-rc.3",
+    "body-parser": "^1.15.0",
     "child-process-promise": "^2.0.1",
     "deep-aplus": "^1.0.2",
     "delayed-stream": "^1.0.0",
@@ -45,6 +46,7 @@
     "mmmagic": "^0.4.1",
     "moment": "^2.13.0",
     "multer": "^1.1.0",
+    "nedb": "^1.8.0",
     "q": "^1.4.1",
     "q-io": "^1.13.2",
     "sharp": "^0.14.0",

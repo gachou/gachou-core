@@ -4,6 +4,8 @@ const firstTruthyPromise = require('./utils/first-truthy-promise')
 const Q = require('q')
 const _ = require('lodash')
 const streamWhenReady = require('./utils/stream-when-ready')
+const moment = require('moment')
+const md5 = require('md5')
 
 var mmm = require('mmmagic')
 const magicFile = [
@@ -139,7 +141,7 @@ module.exports =
      * @return {stream.Readable}
      */
     readThumbnail (uriPath, thumbSpecName, options) {
-      return streamWhenReady.readable(this.storage.get(uriPath, thumbSpecName, options))
+      return streamWhenReady.readable(this.storage.read(uriPath, thumbSpecName, options))
     }
 
     extractMetadata (file) {
@@ -147,6 +149,7 @@ module.exports =
       return Q.all(this.metadataExtractors.map((extractor) => extractor.load(file)))
         // Collect and merge results
         .then((metadata) => metadata.reduce(_.merge, {}))
+        .then(addUriPath)
         .then((metadata) => {
           console.log('Metadata', metadata)
           return metadata
@@ -157,10 +160,15 @@ module.exports =
       return this.metadataIndex.store(metadata)
     }
 
-    readMetadata (uriPath) {
-      return this.metadataIndex.get(uriPath)
+    /**
+     *
+     * @param {object} queryObj
+     * @param {Date=} queryObj.after
+     * @param {Date=} queryObj.before
+     */
+    queryMetadata (queryObj) {
+      return this.metadataIndex.query(queryObj)
     }
-
     /**
      * Create a Duplex stream that builds a thumbnail of a file.
      * @param {string} mimeType a MIMEType
@@ -172,4 +180,21 @@ module.exports =
         firstTruthyPromise(this.thumbnailers, this, [mimeType, this.thumbspec[thumbSpecName]])
       )
     }
+}
+
+/**
+ *
+ * @param {FileMetadata} metadata
+ * @returns {FileMetadata}
+ */
+function addUriPath (metadata) {
+  var formattedDate = moment(metadata.created).format('YYYY-MM-DD--HH-mm-ss')
+  var unifier = md5(metadata.uuid).substring(0, 10)
+  var extension = extensions[metadata.mimeType]
+  metadata.uriPath = `${formattedDate}-${unifier}.${extension}`
+  return metadata
+}
+
+var extensions = {
+  'image/jpeg': 'jpg'
 }

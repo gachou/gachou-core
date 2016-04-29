@@ -67,13 +67,13 @@ describe('the MediaFile#load method()', function () {
         return expect(MediaFile.load(file).get('id')).to.eventually.equal('gachou-12345')
       })
   })
-})
 
-describe('the urlId-method', function () {
-  it('should return an urlId based on the createDate and the id', () => {
-    return imageTestdata('with-xmp-identifier.jpg', tmpFolder)
-      .then((file) => {
-        return expect(MediaFile.load(file).get('uriPath')).to.eventually.equal('2011-06-23--16-15-45-d81454bf3e.jpg')
-      })
+  describe('the urlId-method', function () {
+    it('should return an urlId based on the createDate and the id', () => {
+      return imageTestdata('with-xmp-identifier.jpg', tmpFolder)
+        .then((file) => {
+          return expect(MediaFile.load(file).get('uriPath')).to.eventually.equal('2011-06-23--16-15-45-d81454bf3e.jpg')
+        })
+    })
   })
 })

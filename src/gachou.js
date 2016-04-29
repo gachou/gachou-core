@@ -1,9 +1,9 @@
 'use strict'
 
 const express = require('express')
+const bodyParser = require('body-parser')
 const multer = require('multer')
 const setup = require('./default-setup')
-const MediaFile = require('./model/MediaFile')
 const fs = require('fs')
 const async = require('async')
 const qfs = require('q-io/fs')
@@ -51,6 +51,8 @@ class Gachou {
       dest: this.uploadDir
     })
 
+    router.use(bodyParser.json())
+
     // Deliver media-files from the storage
     router.get('/media/:uriPath',
       (req, res, next) => this.api.readFile(req.params.uriPath).pipe(res))
@@ -58,31 +60,58 @@ class Gachou {
     router.get('/thumbs/:thumbSpec/:uriPath',
       (req, res, next) => this.api.readThumbnail(req.params.uriPath, req.params.thumbSpec).pipe(res))
 
+    router.get('/query', (req, res, next) => {
+      this.api.queryMetadata({
+        after: req.query.after && new Date(req.query.after),
+        before: req.query.before && new Date(req.query.before)
+      })
+        .then((result) => result.map((entry) => {
+          return {
+            uriPath: entry.uriPath,
+            created: entry.created,
+            tags: entry.custom.exiftool['XMP:HierarchicalSubject']
+          }
+        }))
+        .done((result) => res.json(result), (err) => next(err))
+    })
+
+    router.post('/query', (req, res, next) => {
+      Q.ninvoke(this.api.metadataIndex.db, 'find', req.body)
+        .done(
+          (result) => res.json(result),
+          (err) => next(err))
+    })
+
     // Upload-workflow for media-files:
     router.post('/upload', upload.single('file'), (req, res, next) => {
       return this.api.normalize(req.file.path, {
         created: req.body.created
       })
-        .then((file) => MediaFile.from(file, this.api.extractMetadata(file)))
-        .then((mediaFile) => {
+        .then((file) => Q.all([file, this.api.extractMetadata(file)]))
+        .spread((file, metadata) => {
           return waitForWritable(
-            fs.createReadStream(mediaFile.file)
-              .pipe(this.api.storeFile(mediaFile.uriPath))
+            fs.createReadStream(file)
+              .pipe(this.api.storeFile(metadata.uriPath))
           )
-            .then(() => qfs.remove(mediaFile.file))
-            .then(() => mediaFile)
+            .then(() => qfs.remove(file))
+            .then(() => metadata)
         })
-        .then((mediaFile) => {
-          Object.keys(this.api.thumbspec)
-            .forEach((specName) => this.thumbWorker.push({
+        .then((metadata) => {
+          // Store metadata
+          return this.api.metadataIndex.store(metadata)
+        })
+        .then((metadata) => {
+          Object.keys(this.api.thumbspec).forEach((specName) => {
+            this.thumbWorker.push({
               thumbSpecName: specName,
-              uriPath: mediaFile.uriPath,
-              mimeType: mediaFile.mimeType
-            }))
-          return mediaFile
+              uriPath: metadata.uriPath,
+              mimeType: metadata.mimeType
+            })
+          })
+          return metadata
         })
-        .done(function (mediaFile) {
-          res.send(mediaFile.uriPath)
+        .done(function (metadata) {
+          res.send(JSON.stringify(metadata))
         }) // TODO continue here
     })
     return router

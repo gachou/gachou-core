@@ -9,6 +9,7 @@ module.exports = function (basePath) {
     .useStorage(new FileStorage(path.join(basePath, 'media-storage')))
     .useNormalizer(require('./normalizers/to-jpeg'))
     .useExtractor(require('./metadata-extractors/exiftool'))
+    .useMetadataIndex(require('./metadata-index/nedb-metadata-index')(path.join(basePath, 'metadata-index')))
     .useThumbnailer(require('./thumbnailers/sharp'))
     .useThumbSpec('200x200', {width: 200, height: 200})
 }

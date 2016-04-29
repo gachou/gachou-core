@@ -13,12 +13,13 @@
 
 require('trace')
 
-var metadataIndex = require('../src/metadata-index')
+var metadataIndex = require('../src/metadata-index/nedb-metadata-index')
 // var path = require('path')
 var chai = require('chai')
 var expect = chai.expect
 var qfs = require('q-io/fs')
 chai.use(require('chai-as-promised'))
+var _ = require('lodash')
 
 var tmpfolder = 'test-tmp'
 
@@ -34,20 +35,28 @@ const ignoreENOENT = (err) => {
  */
 var mdIndex
 
+/**
+ *
+ * @type {FileMetadata[]}
+ */
 var testData = [{
   id: '123',
   urlId: 'abc.jpg',
-  createDate: new Date('2013-04-06T10:00:00Z')
+  created: new Date('2013-04-06T10:00:00Z'),
+  uriPath: 'xyz.jpg'
 },
   {
     id: '124',
     urlId: 'bcd.jpg',
-    createDate: new Date('2014-04-06T10:00:00Z')
+    created: new Date('2014-04-06T10:00:00Z'),
+    uriPath: 'vwx.jpg'
   },
   {
     id: '125',
     urlId: 'cde.jpg',
-    createDate: new Date('2015-04-06T10:00:00Z')
+    createDate: new Date('2015-04-06T10:00:00Z'),
+    uriPath: 'uvw.jpg'
+
   }
 ]
 
@@ -63,42 +72,58 @@ beforeEach(() => {
 describe('the store-method should store documents in the database', function () {
   beforeEach(() => {
     console.log(testData)
-    return mdIndex.store(testData)
+    return _.cloneDeep(testData).forEach((td) => mdIndex.store(td))
   })
 
   describe('and the byId-method', function () {
     it('should retrieve them', function () {
-      return expect(mdIndex.byId('123')).to.eventually.deep.equal({
+      return expect(mdIndex.byId('123').then(postProcess)).to.eventually.deep.equal({
         id: '123',
         urlId: 'abc.jpg',
-        createDate: new Date('2013-04-06T10:00:00Z')
+        created: new Date('2013-04-06T10:00:00Z'),
+        uriPath: 'xyz.jpg'
       })
     })
   })
 
   describe('and the byUrlId-method', function () {
     it('should retrieve them via urlId', function () {
-      return expect(mdIndex.byUrlId('abc.jpg')).to.eventually.deep.equal({
+      return expect(mdIndex.byUrlId('abc.jpg').then(postProcess)).to.eventually.deep.equal({
         id: '123',
         urlId: 'abc.jpg',
-        createDate: new Date('2013-04-06T10:00:00Z')
+        created: new Date('2013-04-06T10:00:00Z'),
+        uriPath: 'xyz.jpg'
       })
     })
   })
 
   describe('and the query-method', function () {
     it('should return all documents on an empty query"', function () {
-      return expect(mdIndex.query({})).to.eventually.deep.equal(testData)
+      return expect(mdIndex.query({})
+        .then((r) => r.map(postProcess))).to.eventually.deep.equal(testData)
     })
+
     it('should return them based on "after" and "before" filters', function () {
       return expect(mdIndex.query({
         after: new Date('2013-11-06T11:00:00Z'),
         before: new Date('2015-01-06T11:00:00Z')
-      })).to.eventually.deep.equal([{
+      }).then((r) => r.map(postProcess))).to.eventually.deep.equal([{
         id: '124',
         urlId: 'bcd.jpg',
-        createDate: new Date('2014-04-06T10:00:00Z')
+        created: new Date('2014-04-06T10:00:00Z'),
+        uriPath: 'vwx.jpg'
       }])
     })
   })
 })
+
+/**
+ * Post-process a $loki-document (i.e. remove $loki and meta)
+ * @param result
+ * @returns {*}
+ */
+function postProcess (result) {
+  delete result.meta
+  delete result.$loki
+  return result
+}
