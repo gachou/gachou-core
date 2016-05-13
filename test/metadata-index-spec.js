@@ -123,7 +123,5 @@ describe('the store-method should store documents in the database', function () 
  * @returns {*}
  */
 function postProcess (result) {
-  delete result.meta
-  delete result.$loki
   return result
 }

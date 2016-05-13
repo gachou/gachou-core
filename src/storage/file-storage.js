@@ -19,7 +19,11 @@ module.exports =
     store (uriPath, collectionName) {
       var targetPath = this.expand(uriPath, collectionName)
       return qfs.makeTree(path.dirname(targetPath))
-        .then(() => fs.createWriteStream(targetPath))
+        .then(() => fs.createWriteStream(targetPath, {
+          // Fail if file already exists. We don't want to overwrite existing
+          // data. Instead, the filename should be unique (and the file indefinitely cachable)
+          'flags': 'wx'
+        }))
     }
 
     read (uriPath, collectionName, options) {

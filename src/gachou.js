@@ -99,6 +99,7 @@ class Gachou {
         .then((metadata) => {
           // Store metadata
           return this.api.metadataIndex.store(metadata)
+            .then(() => metadata)
         })
         .then((metadata) => {
           Object.keys(this.api.thumbspec).forEach((specName) => {

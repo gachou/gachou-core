@@ -26,11 +26,10 @@ class MetadataIndex {
    * @returns {Promise}
    */
   store (metadata) {
-    if (metadata.$loki) {
-      return Q.ninvoke(this.db, 'update', metadata)
-    } else {
-      return Q.ninvoke(this.db, 'insert', metadata)
-    }
+    metadata._id = metadata.uuid
+    return Q.ninvoke(this.db, 'update', { _id: metadata._id }, metadata, {
+      upsert: true
+    })
   }
 
   /**
