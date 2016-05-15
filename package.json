@@ -15,7 +15,7 @@
   "bugs": {
     "url": "https://github.com/gachou/gachou-core/issues"
   },
-  "main": "index.js",
+  "main": "src/gachou.js",
   "license": "MIT",
   "scripts": {
     "start": "node dist/start.js",
