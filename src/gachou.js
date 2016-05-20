@@ -58,7 +58,14 @@ class Gachou {
       (req, res, next) => this.api.readFile(req.params.uriPath).pipe(res))
 
     router.get('/thumbs/:thumbSpec/:uriPath',
-      (req, res, next) => this.api.readThumbnail(req.params.uriPath, req.params.thumbSpec).pipe(res))
+      (req, res, next) => {
+        this.api.readThumbnail(req.params.uriPath, req.params.thumbSpec)
+          .on('error', (error) => {
+            console.log(error.message)
+            next(error)
+          })
+          .pipe(res)
+      })
 
     router.get('/query', (req, res, next) => {
       this.api.queryMetadata({
@@ -114,6 +121,10 @@ class Gachou {
         .done(function (metadata) {
           res.send(JSON.stringify(metadata))
         }) // TODO continue here
+    })
+
+    router.use(function (err, req, res, next) {
+      res.status(500).send(JSON.stringify(err))
     })
     return router
   }

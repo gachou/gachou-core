@@ -27,7 +27,9 @@ function writable (promise) {
 function readable (promise) {
   var result = new stream.PassThrough()
   Q(promise).done(
-    (stream) => stream.pipe(result),
+    (stream) => stream
+      .on('error', (error) => result.emit('error', error))
+      .pipe(result),
     (err) => result.emit('error', err))
   return result
 }
