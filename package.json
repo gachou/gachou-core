@@ -60,7 +60,8 @@
     "image-testdata": "github:gachou/image-testdata",
     "mocha": "^2.3.3",
     "thoughtful-release": "^0.3.0",
-    "trace": "^2.3.0"
+    "trace": "^2.3.0",
+    "typescript": "^1.8.10"
   },
   "standard": {
     "ignore": [

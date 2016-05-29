@@ -1,7 +1,6 @@
 'use strict'
 
-module.exports =
-  class {
+export interface StorageAPI {
 
     /**
      * Returns a Readable stream of the files contents,
@@ -10,7 +9,7 @@ module.exports =
      * @param {string} collectionName the name of the collection (`default`, `200x200`)
      * @returns {Promise<Writable>|Writable}
      */
-    store (uriPath, collectionName) {}
+    store (uriPath, collectionName)
 
     /**
      * Returns a Readable stream of the files contents,
@@ -22,5 +21,5 @@ module.exports =
      * @param {number=} options.to
      * @returns {Promise<Readable>|Readable}
      */
-    read (uriPath, collectionName, options) {}
+    read (uriPath, collectionName, options)
 }
