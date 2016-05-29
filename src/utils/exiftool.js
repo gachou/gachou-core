@@ -124,6 +124,10 @@ class ExifTool {
 }
 
 var exifMomentFormat = 'YYYY:MM:DD hh:mm:ss'
+module.exports.parseExifMoment = function (dateStr) {
+  return moment(dateStr, exifMomentFormat)
+}
+
 module.exports.parseExifDate = function (dateStr) {
-  return moment(dateStr, exifMomentFormat).toDate()
+  return module.exports.parseExifMoment(dateStr).toDate()
 }

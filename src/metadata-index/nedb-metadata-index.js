@@ -32,12 +32,7 @@ class MetadataIndex {
     })
   }
 
-  /**
-   * Run a query on the metadata
-   * @param {MetadataQuery} queryObj
-   * @returns {Promise<FileMetadata[]>}
-   */
-  query (queryObj) {
+  queryFor (queryObj) {
     var query = {
       $and: []
     }
@@ -47,8 +42,29 @@ class MetadataIndex {
     if (queryObj.before) {
       query.$and.push({created: {$lt: queryObj.before}})
     }
+    if (queryObj.year) {
+      query.$and.push({year: queryObj.year})
+    }
+    if (queryObj.month) {
+      query.$and.push({month: queryObj.month})
+    }
+  }
 
+  /**
+   * Run a query on the metadata
+   * @param {MetadataQuery} queryObj
+   * @returns {Promise<FileMetadata[]>}
+   */
+  query (queryObj) {
+    var query = this.queryFor(queryObj)
     return Q.ninvoke(this.db.find(query).sort({ created: 1 }), 'exec')
   }
+
+  /**
+   * Return possible search terms for a given search string
+   * @param queryObj
+   * @param searchStr
+     */
+  facets (queryObj, searchStr) {}
 
 }
